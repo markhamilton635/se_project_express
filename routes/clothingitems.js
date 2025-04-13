@@ -1,7 +1,12 @@
 const router = require("express").Router()
+const { createItem, getItems, updateItem, deleteItem } = require('../controllers/clothingItems')
 
-router.get("/", () => console.log("GET items"));
-router.post("/", () => console.log("POST new item"));
-router.delete("/:itemId", () => console.log("DELETE item by id"));
+router.get("/", getItems);
+router.post("/", createItem);
+router.delete("/:itemId", deleteItem);
+router.put("/:itemId/likes", () => console.log("PUT like"));
+router.delete("/:itemId/likes", () => console.log("DELETE like"));
+
+
 
 module.exports = router;
