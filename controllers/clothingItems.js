@@ -37,11 +37,10 @@ const deleteItem = (req, res) => {
         res.status(NOT_FOUND).send({ message: err.message });
       } else if (err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(SERVER_ERROR).send({ message: err.message });
       }
-
-      return res.status(SERVER_ERROR).send({ message: err.message });
     });
-
 };
 
 const likeItem = (req, res) =>
@@ -49,7 +48,8 @@ const likeItem = (req, res) =>
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
-  ).orFail()
+  )
+    .orFail()
     .then((updatedItem) => res.send(updatedItem))
     .catch((err) => {
       console.error(err);
@@ -59,9 +59,9 @@ const likeItem = (req, res) =>
         res.status(NOT_FOUND).send({ message: err.message });
       } else if (err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(SERVER_ERROR).send({ message: err.message });
       }
-
-      return res.status(SERVER_ERROR).send({ message: err.message });
     });
 
 const dislikeItem = (req, res) =>
@@ -69,7 +69,8 @@ const dislikeItem = (req, res) =>
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
-  ).orFail()
+  )
+    .orFail()
     .then((updatedItem) => res.send(updatedItem))
     .catch((err) => {
       console.error(err);
@@ -79,9 +80,9 @@ const dislikeItem = (req, res) =>
         res.status(NOT_FOUND).send({ message: err.message });
       } else if (err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(SERVER_ERROR).send({ message: err.message });
       }
-
-      return res.status(SERVER_ERROR).send({ message: err.message });
     });
 
 module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
