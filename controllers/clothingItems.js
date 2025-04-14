@@ -1,5 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, SERVER_ERROR } = require("../utils/errors");
+const { BAD_REQUEST, SERVER_ERROR, NOT_FOUND } = require("../utils/errors");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
@@ -32,10 +32,16 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        res.status(BAD_REQUEST).send({ message: err.message });
+      } else if (err.name === "DocumentNotFoundError") {
+        res.status(NOT_FOUND).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        res.status(BAD_REQUEST).send({ message: err.message });
       }
+
       return res.status(SERVER_ERROR).send({ message: err.message });
     });
+
 };
 
 const likeItem = (req, res) =>
@@ -43,13 +49,18 @@ const likeItem = (req, res) =>
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
-  )
+  ).orFail()
     .then((updatedItem) => res.send(updatedItem))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        res.status(BAD_REQUEST).send({ message: err.message });
+      } else if (err.name === "DocumentNotFoundError") {
+        res.status(NOT_FOUND).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        res.status(BAD_REQUEST).send({ message: err.message });
       }
+
       return res.status(SERVER_ERROR).send({ message: err.message });
     });
 
@@ -58,13 +69,18 @@ const dislikeItem = (req, res) =>
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
-  )
+  ).orFail()
     .then((updatedItem) => res.send(updatedItem))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        res.status(BAD_REQUEST).send({ message: err.message });
+      } else if (err.name === "DocumentNotFoundError") {
+        res.status(NOT_FOUND).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        res.status(BAD_REQUEST).send({ message: err.message });
       }
+
       return res.status(SERVER_ERROR).send({ message: err.message });
     });
 
