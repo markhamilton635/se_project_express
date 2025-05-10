@@ -26,7 +26,7 @@ const createUser = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      if (err.code === "11000") {
+      if (err.code === 11000) {
         return res
           .status(CONFLICT_ERROR)
           .send({ message: "Duplicate email. (409)" });
@@ -54,6 +54,10 @@ const getCurrentUser = (req, res) => {
 
 const login = (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send({ message: "Email and password are required" });
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -62,7 +66,7 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(401).send({ mesage: err.message });
+      res.status(401).send({ message: err.message });
     });
 };
 

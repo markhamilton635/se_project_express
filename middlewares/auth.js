@@ -7,7 +7,7 @@ const auth = (req, res, next) => {
   if (!authorization || !authorization.startsWith("Bearer")) {
     return res.status(401).send({ message: "Authorization required" });
   }
-  const token = authorization.replace("Bearer", "");
+  const token = authorization.replace("Bearer ", "");
   let payload;
 
   try {
