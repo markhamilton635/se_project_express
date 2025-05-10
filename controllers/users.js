@@ -10,16 +10,6 @@ const {
   CONFLICT_ERROR,
 } = require("../utils/errors");
 
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res.status(SERVER_ERROR).send({ message: err.message });
-    });
-};
-
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 

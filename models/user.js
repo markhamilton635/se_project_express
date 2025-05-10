@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const validator = require("validator");
 
@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 30,
   },
-  email:{
+  email: {
     type: String,
     required: [true, "The email field is required."],
     unique: true,
@@ -20,15 +20,16 @@ const userSchema = new mongoose.Schema({
       message: "You must enter a valid Email",
     },
   },
-  password:{
+  password: {
     type: String,
     required: [true, "The password field is required."],
-    select:false,
+    select: false,
     validate: {
       validator(value) {
         return validator.isStrongPassword(value);
       },
-      message: "Your password must be at least 8 charachters long, have 1 lowercase, 1 uppercase, 1 symbol and 1 number",
+      message:
+        "Your password must be at least 8 charachters long, have 1 lowercase, 1 uppercase, 1 symbol and 1 number",
     },
   },
   avatar: {
@@ -43,21 +44,24 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.statics.findUserByCredentials = function findUserByCredentials(email,password){
-  return this.findOne({email}).select('+password')
-  .then((user) => {
-    if (!user){S
-      return Promise.reject(new Error('Incorrect email or password'));
-    }
-    return bcrypt.compare(password, user.password)
-    .then((matched) => {
-      if(!matched){
-        return Promise.reject(new Error('Incorrect email or password '));
+userSchema.statics.findUserByCredentials = function findUserByCredentials(
+  email,
+  password
+) {
+  return this.findOne({ email })
+    .select("+password")
+    .then((user) => {
+      if (!user) {
+        S;
+        return Promise.reject(new Error("Incorrect email or password"));
       }
-      return user;
-    })
-
-  })
-}
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error("Incorrect email or password "));
+        }
+        return user;
+      });
+    });
+};
 
 module.exports = mongoose.model("user", userSchema);
