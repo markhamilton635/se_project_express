@@ -1,5 +1,14 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/user");
-const { SERVER_ERROR, BAD_REQUEST, NOT_FOUND } = require("../utils/errors");
+
+const {
+  SERVER_ERROR,
+  BAD_REQUEST,
+  NOT_FOUND,
+  CONFLICT_ERROR,
+} = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -11,21 +20,32 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then((user) =>
+      res
+        .status(201)
+        .send({ name: user.name, avatar: user.avatar, email: user.email })
+    )
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
+      if (err.code === "11000") {
+        return res
+          .status(CONFLICT_ERROR)
+          .send({ message: "Duplicate email. (409)" });
+      }
       return res.status(SERVER_ERROR).send({ message: err.message });
     });
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
+const getCurrentUser = (req, res) => {
+  const userId  = req.user._id;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
@@ -41,4 +61,18 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+const login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ mesage: err.message});
+    });
+};
+
+module.exports = { getUsers, createUser, getCurrentUser, login };
