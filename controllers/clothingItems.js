@@ -1,5 +1,10 @@
 const ClothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, SERVER_ERROR, NOT_FOUND } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  SERVER_ERROR,
+  NOT_FOUND,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
@@ -25,10 +30,19 @@ const createItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  console.log(itemId);
-  ClothingItem.findByIdAndDelete(itemId)
+  const userId = req.user._id.toString();
+  ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => res.status(200).send(item))
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "you are not authorized to delete this item" });
+      }
+      return ClothingItem.findByIdAndDelete(itemId)
+        .orFail()
+        .then((deletedItem) => res.status(200).send(deletedItem));
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {

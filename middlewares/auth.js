@@ -7,7 +7,7 @@ const auth = (req, res, next) => {
   if (!authorization || !authorization.startsWith("Bearer")) {
     return res.status(401).send({ message: "Authorization required" });
   }
-  const token = authorization.replace("bearer", "");
+  const token = authorization.replace("Bearer", "");
   let payload;
 
   try {
@@ -17,7 +17,7 @@ const auth = (req, res, next) => {
   }
 
   req.user = payload;
-  next();
+  return next();
 };
 
 module.exports = { auth };

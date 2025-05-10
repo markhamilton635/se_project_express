@@ -10,6 +10,7 @@ const {
   CONFLICT_ERROR,
 } = require("../utils/errors");
 
+
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
@@ -45,7 +46,7 @@ const createUser = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  const userId  = req.user._id;
+  const userId = req.user._id;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
@@ -71,8 +72,30 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(401).send({ mesage: err.message});
+      res.status(401).send({ mesage: err.message });
     });
 };
 
-module.exports = { getUsers, createUser, getCurrentUser, login };
+const updateProfile = (req, res) => {
+  const userId = req.user._id;
+  const { name, avatar } = req.body;
+  User.findByIdAndUpdate(
+    userId,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
+      }
+      return res.status(SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+module.exports = { updateProfile, createUser, getCurrentUser, login };
