@@ -8,10 +8,10 @@ const {
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.send(items))
     .catch((err) => {
       console.error(err);
-      return res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -24,7 +24,7 @@ const createItem = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -41,7 +41,7 @@ const deleteItem = (req, res) => {
       }
       return ClothingItem.findByIdAndDelete(itemId)
         .orFail()
-        .then((deletedItem) => res.status(200).send(deletedItem));
+        .then((deletedItem) => res.send(deletedItem));
     })
     .catch((err) => {
       console.error(err);
@@ -52,7 +52,7 @@ const deleteItem = (req, res) => {
       } else if (err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: err.message });
       } else {
-        res.status(SERVER_ERROR).send({ message: err.message });
+        res.status(SERVER_ERROR).send({ message:"An error has occurred on the server" });
       }
     });
 };
@@ -74,7 +74,7 @@ const likeItem = (req, res) =>
       } else if (err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: err.message });
       } else {
-        res.status(SERVER_ERROR).send({ message: err.message });
+        res.status(SERVER_ERROR).send({ message: "An error has occurred on the server" });
       }
     });
 
@@ -95,7 +95,7 @@ const dislikeItem = (req, res) =>
       } else if (err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: err.message });
       } else {
-        res.status(SERVER_ERROR).send({ message: err.message });
+        res.status(SERVER_ERROR).send({ message: "An error has occurred on the server" });
       }
     });
 
